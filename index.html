@@ -8,6 +8,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'Cairo', sans-serif;
@@ -17,41 +21,81 @@
     }
 
     .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 40px 20px;
+      max-inline-size: 940px;
+      margin-inline: auto;
+      padding: clamp(24px, 5vw, 56px) 20px;
     }
 
     h1, h2 {
+      margin-block: 0 16px;
       font-weight: 600;
+      line-height: 1.5;
+      overflow-wrap: break-word;
     }
 
     h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
+      max-inline-size: 24ch;
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+    }
+
+    bdi {
+      display: inline-block;
+      max-inline-size: 100%;
+      overflow-wrap: anywhere;
     }
 
     h2 {
-      margin-top: 50px;
-      font-size: 22px;
+      font-size: clamp(1.25rem, 3vw, 1.625rem);
     }
 
     p {
-      margin: 15px 0;
+      max-inline-size: 65ch;
+      margin-block: 0 16px;
+    }
+
+    p:last-child {
+      margin-block-end: 0;
+    }
+
+    .hero, .next-step {
+      padding: clamp(20px, 4vw, 40px);
+      border: 1px solid #d8d1c8;
+      border-radius: 16px;
+      background: #fffdf9;
+    }
+
+    .eyebrow {
+      margin-block-end: 12px;
+      color: #62584e;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .intro {
+      font-size: 1.125rem;
     }
 
     .cta {
-      margin-top: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-block-start: 24px;
     }
 
     .btn {
-      display: inline-block;
-      margin: 10px 10px 0 0;
-      padding: 12px 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-block-size: 48px;
+      max-inline-size: 100%;
+      padding: 10px 20px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
       text-decoration: none;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: 0.3s;
+      overflow-wrap: anywhere;
     }
 
     .primary {
@@ -60,128 +104,131 @@
     }
 
     .secondary {
-      border: 1px solid #ccc;
+      border-color: #81766b;
       color: #2b2b2b;
+      background: #fffdf9;
     }
 
-    .btn:hover {
-      opacity: 0.8;
+    .primary:hover {
+      background: #474039;
+    }
+
+    .secondary:hover {
+      background: #eee8df;
+    }
+
+    a:focus-visible, iframe:focus-visible {
+      outline: 3px solid #075a9c;
+      outline-offset: 4px;
     }
 
     .section {
-      margin-top: 60px;
+      margin-block-start: clamp(32px, 6vw, 56px);
+    }
+
+    #demo {
+      scroll-margin-block-start: 24px;
     }
 
     .demo {
-      margin-top: 30px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      overflow: hidden;
+      margin-block-start: 24px;
     }
 
     iframe {
-      width: 100%;
-      height: 500px;
-      border: none;
+      display: block;
+      inline-size: 100%;
+      block-size: clamp(420px, 70vh, 680px);
+      border: 1px solid #81766b;
+      border-radius: 10px;
+      background: #fff;
     }
 
     ul {
-      padding-right: 20px;
+      margin-block: 0 24px;
+      padding-inline-start: 24px;
     }
 
     li {
-      margin: 10px 0;
+      margin-block: 10px;
+      padding-inline-start: 4px;
+    }
+
+    .value {
+      padding-inline-start: 20px;
+      border-inline-start: 3px solid #81766b;
     }
 
     .footer {
-      margin-top: 80px;
+      margin-block-start: clamp(32px, 6vw, 56px);
       text-align: center;
-      font-size: 14px;
-      color: #777;
+      font-size: 0.875rem;
+      color: #62584e;
     }
 
+    @media (max-width: 480px) {
+      .container {
+        padding-inline: 16px;
+      }
+
+      .cta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        inline-size: 100%;
+      }
+    }
   </style>
 </head>
 
 <body>
-
 <div class="container">
+  <main>
+    <section class="hero" aria-labelledby="intro-title">
+      <p class="eyebrow">تصوّر أولي لتجربة المقهى الرقمية</p>
+      <h1 id="intro-title">قمت بتصميم تجربة رقمية لمقهى <bdi lang="en" dir="ltr">Ari Cafe</bdi>… قبل أن نتحدث</h1>
+      <p class="intro">بناءً على أسلوب المكان والتفاصيل، تم إعداد نموذج موقع يعكس تجربة المقهى بشكل أوضح.</p>
+      <p>الفكرة بسيطة: أن يتعرّف الزائر على المقهى ويجد خطوته التالية بسهولة.</p>
+      <div class="cta">
+        <a href="#demo" class="btn primary">استكشاف النموذج</a>
+        <a href="https://wa.me/966565551538" class="btn secondary">تواصل عبر واتساب</a>
+      </div>
+    </section>
 
-  <!-- Hero -->
-  <h1>قمت بتصميم تجربة رقمية لمقهى Ari Cafe… قبل أن نتحدث</h1>
+    <section id="demo" class="section" aria-labelledby="demo-title">
+      <h2 id="demo-title">النموذج المقترح</h2>
+      <p>استكشف التصوّر أدناه لتكوين فكرة عن طريقة عرض المقهى. هذا نموذج للنقاش والتطوير، وليس موقعاً نهائياً معتمداً.</p>
+      <div class="demo">
+        <iframe src="https://ari-cafee-mubarraz.aura.build" title="النموذج المقترح لتجربة مقهى آري الرقمية"></iframe>
+      </div>
+    </section>
 
-  <p>
-    بناءً على أسلوب المكان والتفاصيل، تم إعداد نموذج موقع يعكس تجربة المقهى بشكل أوضح.
-  </p>
+    <section class="section" aria-labelledby="benefits-title">
+      <h2 id="benefits-title">ما الذي يهدف إليه النموذج؟</h2>
+      <ul>
+        <li>عرض واضح للمعلومات الأساسية</li>
+        <li>تجربة استخدام بسيطة وسهلة التصفّح</li>
+        <li>توجيه الزائر إلى خطوة تواصل واضحة</li>
+        <li>تصميم يعكس هوية المقهى</li>
+      </ul>
+      <div class="value">
+        <p>التجربة الرقمية جزء من هوية المقهى. وضوح المعلومات والخطوة التالية يساعد الزائر على تكوين انطباع عن المكان قبل زيارته.</p>
+      </div>
+    </section>
 
-  <div class="cta">
-    <a href="#demo" class="btn primary">استكشاف النموذج</a>
-    <a href="https://wa.me/966565551538" class="btn secondary">تواصل عبر واتساب</a>
-  </div>
+    <section class="section next-step" aria-labelledby="next-title">
+      <h2 id="next-title">هل ترى أن هذا يعكس تجربة المقهى؟</h2>
+      <p>يمكن اعتماد هذا النموذج كنقطة بداية وتعديله حسب الحاجة. نبدأ بملاحظاتك: ما الذي يناسب المقهى، وما الذي ترغب في تغييره؟</p>
+      <p>شارك رأيك عبر واتساب لبدء الحديث بدون التزام، أو استخدم النموذج لمشاركة تفاصيل المشروع.</p>
+      <div class="cta">
+        <a href="https://wa.me/966565551538" class="btn primary">تواصل عبر واتساب</a>
+        <a href="https://mohammaddawi.typeform.com/to/GYSdtXup" class="btn secondary">مشاركة تفاصيل المشروع</a>
+      </div>
+    </section>
+  </main>
 
-  <!-- Hook -->
-  <div class="section">
-    <p>
-      بعض العملاء يقررون زيارة المقهى… لكن لا يكملون بسبب خطوة صغيرة في التواصل.
-    </p>
-    <p>
-      ليس لأنهم غير مهتمين، بل لأن التجربة لم تكن واضحة بما يكفي.
-    </p>
-  </div>
-
-  <!-- Demo -->
-  <div id="demo" class="section">
-    <h2>النموذج المقترح</h2>
-
-    <div class="demo">
-      <iframe src="https://ari-cafee-mubarraz.aura.build"></iframe>
-    </div>
-  </div>
-
-  <!-- Explanation -->
-  <div class="section">
-    <h2>ما الذي تم تحسينه؟</h2>
-    <ul>
-      <li>عرض واضح للمعلومات الأساسية</li>
-      <li>تجربة استخدام بسيطة وسريعة</li>
-      <li>توجيه العميل بخطوة واضحة</li>
-      <li>تصميم يعكس هوية المقهى</li>
-    </ul>
-  </div>
-
-  <!-- Value -->
-  <div class="section">
-    <h2>لماذا هذا مهم؟</h2>
-    <p>أول انطباع أصبح رقمياً، وكثير من القرارات تُحسم قبل الزيارة.</p>
-    <p>التجربة الرقمية جزء من هوية المقهى، وليست مجرد وسيلة تواصل.</p>
-  </div>
-
-  <!-- Offer -->
-  <div class="section">
-    <h2>كيف يمكن البدء؟</h2>
-    <p>
-      يمكن اعتماد هذا النموذج كنقطة بداية، مع إمكانية التعديل والتطوير حسب الحاجة.
-    </p>
-    <p>
-      البداية تكون بسيطة — بدون التزام.
-    </p>
-  </div>
-
-  <!-- CTA -->
-  <div class="section">
-    <h2>هل ترى أن هذا يعكس تجربة المقهى؟</h2>
-
-    <div class="cta">
-      <a href="https://wa.me/966565551538" class="btn primary">تواصل الآن</a>
-      <a href="https://mohammaddawi.typeform.com/to/GYSdtXup" class="btn secondary">مشاركة التفاصيل</a>
-    </div>
-  </div>
-
-  <div class="footer">
-    تجربة رقمية مصممة بعناية — بدون تعقيد
-  </div>
-
+  <footer class="footer">تجربة رقمية مصممة بعناية — بدون تعقيد</footer>
 </div>
-
 </body>
 </html>
