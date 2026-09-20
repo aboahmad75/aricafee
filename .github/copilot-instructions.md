@@ -25,4 +25,3 @@ This repository is a non-production EAF experimental sandbox.
 - Keep changes bounded to the approved Pilot task.
 - Preserve bilingual English/Arabic behavior and the language toggle.
 - Verification is performed through the approved independent browser-QA path.
-
