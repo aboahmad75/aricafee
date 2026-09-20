@@ -1,0 +1,232 @@
+name: EAF QA Runtime Precheck
+
+on:
+  push:
+    branches:
+      - eaf/qa-runtime-precheck-01
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-precheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout QA branch
+        uses: actions/checkout@v4
+
+      - name: Verify repository state before
+        shell: bash
+        run: |
+          echo "=== REPOSITORY STATE BEFORE ==="
+          echo "BRANCH=${GITHUB_REF_NAME}"
+          echo "HEAD=$(git rev-parse HEAD)"
+          git status --short
+
+      - name: Prepare isolated Playwright runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          QA_DIR="${RUNNER_TEMP}/eaf-qa-precheck"
+          mkdir -p "$QA_DIR"
+          cd "$QA_DIR"
+
+          npm init -y >/dev/null
+          npm install playwright@1.62.1
+
+          echo "=== PLAYWRIGHT VERSION ==="
+          npx playwright --version
+
+          echo "=== INSTALL CHROMIUM + SYSTEM DEPENDENCIES ==="
+          npx playwright install --with-deps chromium
+
+      - name: Run browser capability precheck
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          QA_DIR="${RUNNER_TEMP}/eaf-qa-precheck"
+          cd "$QA_DIR"
+
+          cat > precheck.js <<'EOF'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const consoleErrors = [];
+            let failed = false;
+
+            const html = `
+            <!doctype html>
+            <html lang="en" dir="ltr">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>EAF QA Precheck</title>
+              <style>
+                body {
+                  margin: 0;
+                  font-family: sans-serif;
+                }
+                main {
+                  max-width: 1000px;
+                  margin: auto;
+                  padding: 24px;
+                }
+                .card {
+                  padding: 24px;
+                  border: 1px solid #ccc;
+                }
+                button {
+                  padding: 12px 20px;
+                }
+              </style>
+            </head>
+            <body>
+              <main>
+                <div class="card">
+                  <h1>EAF Browser QA Precheck</h1>
+                  <button id="toggle">Toggle RTL</button>
+                </div>
+              </main>
+
+              <script>
+                document.getElementById('toggle').addEventListener('click', () => {
+                  const el = document.documentElement;
+                  const isRtl = el.dir === 'rtl';
+                  el.dir = isRtl ? 'ltr' : 'rtl';
+                  el.lang = isRtl ? 'en' : 'ar';
+                });
+              </script>
+            </body>
+            </html>`;
+
+            for (const width of [1440, 768, 390]) {
+              const page = await browser.newPage({
+                viewport: { width, height: 900 }
+              });
+
+              page.on('console', message => {
+                if (message.type() === 'error') {
+                  consoleErrors.push(
+                    `[${width}] ${message.text()}`
+                  );
+                }
+              });
+
+              page.on('pageerror', error => {
+                consoleErrors.push(
+                  `[${width}] ${error.message}`
+                );
+              });
+
+              await page.setContent(html, {
+                waitUntil: 'load'
+              });
+
+              const before = await page.evaluate(() => ({
+                dir: document.documentElement.dir,
+                lang: document.documentElement.lang,
+                scrollWidth: document.documentElement.scrollWidth,
+                clientWidth: document.documentElement.clientWidth
+              }));
+
+              await page.click('#toggle');
+
+              const after = await page.evaluate(() => ({
+                dir: document.documentElement.dir,
+                lang: document.documentElement.lang,
+                scrollWidth: document.documentElement.scrollWidth,
+                clientWidth: document.documentElement.clientWidth
+              }));
+
+              const beforeOverflow =
+                before.scrollWidth > before.clientWidth;
+
+              const afterOverflow =
+                after.scrollWidth > after.clientWidth;
+
+              const viewportPass =
+                before.dir === 'ltr' &&
+                before.lang === 'en' &&
+                after.dir === 'rtl' &&
+                after.lang === 'ar' &&
+                !beforeOverflow &&
+                !afterOverflow;
+
+              console.log(
+                `VIEWPORT ${width}: ${viewportPass ? 'PASS' : 'FAIL'}`
+              );
+              console.log(
+                `  BEFORE: dir=${before.dir}, lang=${before.lang}`
+              );
+              console.log(
+                `  AFTER: dir=${after.dir}, lang=${after.lang}`
+              );
+              console.log(
+                `  OVERFLOW BEFORE: ${beforeOverflow ? 'YES' : 'NO'}`
+              );
+              console.log(
+                `  OVERFLOW AFTER: ${afterOverflow ? 'YES' : 'NO'}`
+              );
+
+              if (!viewportPass) {
+                failed = true;
+              }
+
+              await page.screenshot({
+                path: `viewport-${width}.png`,
+                fullPage: true
+              });
+
+              await page.close();
+            }
+
+            console.log(
+              `CONSOLE / PAGE ERRORS: ${
+                consoleErrors.length
+                  ? consoleErrors.join(' | ')
+                  : 'NONE'
+              }`
+            );
+
+            if (consoleErrors.length) {
+              failed = true;
+            }
+
+            await browser.close();
+
+            if (failed) {
+              process.exit(1);
+            }
+
+            console.log(
+              'FINAL VERDICT: READY FOR REPRESENTATIVE PILOT VISUAL QA'
+            );
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          EOF
+
+          node precheck.js
+
+      - name: Upload viewport evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eaf-qa-runtime-precheck
+          path: ${{ runner.temp }}/eaf-qa-precheck/viewport-*.png
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Verify repository state after
+        if: always()
+        shell: bash
+        run: |
+          echo "=== REPOSITORY STATE AFTER ==="
+          git status --short
