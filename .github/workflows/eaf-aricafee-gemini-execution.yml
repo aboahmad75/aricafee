@@ -18,10 +18,9 @@ jobs:
   execute:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      GEMINI_CLI_TRUST_WORKSPACE: "true"
 
-env:
-  GEMINI_CLI_TRUST_WORKSPACE: "true"
-  
     steps:
       - name: Checkout authorized pilot branch
         uses: actions/checkout@v5
